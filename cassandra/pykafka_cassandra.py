@@ -65,7 +65,9 @@ if __name__ == '__main__':
 
     cluster = Cluster([cassandra])
     session = cluster.connect()
+    session.execute("create keyspace if not exists %s with replication = {'class': 'SimpleStrategy', 'replication_factor': '1'} and durable_writes = 'true'" % keyspace)
     session.set_keyspace(keyspace)
+    session.execute("create table if not exists %s (stock_symbol text, last_trade_date_time timestamp, last_trade_price float, PRIMARY KEY (stock_symbol,last_trade_date_time))" % table)
 
     atexit.register(cleanup, consumer, session)
 

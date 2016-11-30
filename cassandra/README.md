@@ -9,11 +9,6 @@ pykafka   https://github.com/Parsely/pykafka
 pip install -r requirements.txt
 
 # 运行
-用cqlsh创建keyspace和table：
-CREATE KEYSPACE "stock" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1} AND durable_writes = 'true';
-USE stock;
-CREATE TABLE stock_analyzer (stock_symbol text, last_trade_date_time timestamp, last_trade_price float, PRIMARY KEY (stock_symbol,last_trade_date_time));
-
 使用格式：
 python pykafka-cassandra.py kafka_broker kafka_topic cassandra_ip keyspace table
 
