@@ -33,9 +33,9 @@ def putdata(session, stock_entry):
     try:
         logger.debug('starting to put data to cassandra %s', stock_entry)
         entry = json.loads(stock_entry)[0]
-        symbol = entry.get('StockSymbol')
-        price = float(entry.get('LastTradePrice'))
-        datetime = entry.get('LastTradeDateTime')
+        symbol = entry.get('Symbol')
+        price = float(entry.get('Close'))
+        datetime = entry.get('Date')
         statement = "insert into %s (stock_symbol, last_trade_date_time, last_trade_price) values ('%s', '%s', %f)" % (table, symbol, datetime, price)
         session.execute(statement)
         logger.info('put data successfully to cassandra for stock_symbol: %s, last_trade_data_time: %s, price: %f' % (symbol, datetime, price))
