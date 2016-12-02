@@ -4,6 +4,9 @@ import json
 import sys
 import datetime,time
 import numpy as np
+import matplotlib
+#matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 from sklearn import linear_model
 from kafka import KafkaProducer
@@ -41,6 +44,16 @@ def gracefulShutdown(producer):
         except Exception as e:
             logger.warn('Failed to close kafka connection, caused by: %s', e.message)
 
+def showPlot(dates,prices):
+	linearModel = linear_model.LinearRegression()
+	dates = np.reshape(dates,(len(dates),1)) # converting to matrix of n X 1
+	prices = np.reshape(prices,(len(prices),1))
+	linearModel.fit(dates,prices) #fitting the data points in the model
+	plt.scatter(dates,prices,color='yellow') #plotting the initial datapoints
+	plt.plot(dates,linearModel.predict(dates),color='blue',linewidth=3) #plotting the line made by linear regression
+	plt.show()
+	return
+
 def predictPrice(dates,prices,x):
 	linearModel = linear_model.LinearRegression() #defining the linear regression model
 	dates = np.reshape(dates,(len(dates),1)) # converting to matrix of n X 1
@@ -73,12 +86,16 @@ def pair(data):
     global predicted_price
     record = json.loads(data[1].decode('utf-8'))[0]
 
-    dates.append(int(time.mktime(time.strptime(record.get('LastTradeDateTime'), "%Y-%m-%d"))))
-    prices.append(float(record.get('LastTradePrice')))
+    dates.append(int(time.mktime(time.strptime(record.get('Date'), "%Y-%m-%d"))))
+    prices.append(float(record.get('Close')))
     predicted_price = predictPrice(dates, prices, int(time.mktime(time.strptime(dateTime,"%Y-%m-%d"))))
-    print 'Date:' + record.get('LastTradeDateTime') + "predication:" + str(predicted_price)
+    print 'Date:' + record.get('Date') + "prediction:" + str(predicted_price)
 
-    return record.get('StockSymbol'), (float(record.get('LastTradePrice')), predicted_price, 1)#, record.get('LastTradeDateTime')
+    if len(dates) == 252:
+        #showPlot(dates,prices)
+        print "in"
+
+    return record.get('Symbol'), (float(record.get('Close')), predicted_price, 1)#, record.get('LastTradeDateTime')
 
 if __name__ == '__main__':
     if len(sys.argv) != 5:
@@ -87,7 +104,7 @@ if __name__ == '__main__':
 
     topic, targetTopic, brokers, dateTime = sys.argv[1:] # [checkpoint-directory]
 
-    # Create a local StreamingContext with two working thread and batch interval of 2 seconds
+    # Create a local StreamingContext with two working thread and batch interval of 5 seconds
     sc = SparkContext("local[2]", "StockPricePrediction")
     sc.setLogLevel('ERROR')
     ssc = StreamingContext(sc, 5) #
