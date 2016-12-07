@@ -18,7 +18,7 @@ $(function () {
     var y11 = a * 11 + b;
     var y12 = a * 12 + b;
 
-    Highcharts.chart('container1', {
+    Highcharts.chart('container2', {
         title: {
             text: 'Stock Analysising Results',
             x: -20 //center
@@ -56,3 +56,6 @@ $(function () {
         }]
     });
 });
+/**
+ * Created by henrywan16 on 12/6/16.
+ */
