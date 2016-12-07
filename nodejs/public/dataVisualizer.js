@@ -110,6 +110,9 @@ $(function () {
         var timestamp = parsed['timestamp'];
         var average = parsed['average'];
         var symbol = parsed['symbol'];
+        var coefficient = parsed['coefficient'];
+        var b = parsed['b'];
+        var prediction = parsed['prediction'];
         var point = {};
         point.x = timestamp;
         point.y = average;

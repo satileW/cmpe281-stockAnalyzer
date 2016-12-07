@@ -34,7 +34,7 @@ application.use('/smoothie', expressDependence.static(__dirname + '/node_modules
 application.use('/d3', expressDependence.static(__dirname + '/node_modules/d3/'));
 application.use('/nvd3', expressDependence.static(__dirname + '/node_modules/nvd3/build/'));
 application.use('/bootstrap', expressDependence.static(__dirname + '/node_modules/bootstrap/dist'));
-application.use('canvasjs',expressDependence.static(__dirname + 'node_modules/canvasjs/dist'));
+application.use('/highcharts',expressDependence.static(__dirname + '/node_modules/highcharts'));
 
 nodeJSserver.listen(port, function () {
     console.log('Port %d is monitored by server.', port);
