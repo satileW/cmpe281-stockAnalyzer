@@ -60,7 +60,7 @@ def predictPrice(dates,prices,x):
 	prices = np.reshape(prices,(len(prices),1))
 	linearModel.fit(dates,prices) #fitting the data points in the model
 	predicted_price =linearModel.predict(x)
-	return predicted_price[0][0]#,linearModel.coef_[0][0] ,linearModel.intercept_[0]
+	return predicted_price[0][0],linearModel.coef_[0][0] ,linearModel.intercept_[0]
 
 
 def sendBackKafka(rdd):
@@ -72,7 +72,10 @@ def sendBackKafka(rdd):
                 'symbol': r[0],
                 'timestamp': time.time(),
                 'average': float('%0.3f' %r[1]),
-                'prediction': float('%0.3f' %r[2])
+                'prediction': float('%0.3f' %r[2]),
+                'coefficient': float(r[3]),
+                'b': float(r[4])
+
             }
         )
         try:
@@ -88,14 +91,14 @@ def pair(data):
 
     dates.append(int(time.mktime(time.strptime(record.get('Date'), "%Y-%m-%d"))))
     prices.append(float(record.get('Close')))
-    predicted_price = predictPrice(dates, prices, int(time.mktime(time.strptime(dateTime,"%Y-%m-%d"))))
+    predicted_price, coefficient, b = predictPrice(dates, prices, int(time.mktime(time.strptime(dateTime,"%Y-%m-%d"))))
     print 'Date:' + record.get('Date') + "prediction:" + str(predicted_price)
 
     if len(dates) == 252:
         #showPlot(dates,prices)
         print "in"
 
-    return record.get('Symbol'), (float(record.get('Close')), predicted_price, 1)#, record.get('LastTradeDateTime')
+    return record.get('Symbol'), (float(record.get('Close')), predicted_price, coefficient, b, 1)#, record.get('LastTradeDateTime')
 
 if __name__ == '__main__':
     if len(sys.argv) != 5:
@@ -113,8 +116,8 @@ if __name__ == '__main__':
     directKafkaStream = KafkaUtils.createDirectStream(ssc, [topic], {'metadata.broker.list': brokers})
 
     pairs = directKafkaStream.map(pair)
-    words = pairs.reduceByKey(lambda a, b: (a[0] + b[0], b[1], a[2] + b[2]))
-    ave = words.map(lambda (k, v): (k, v[0]/v[2], v[1])).foreachRDD(sendBackKafka)
+    words = pairs.reduceByKey(lambda a, b: (a[0] + b[0], b[1], b[2], b[3], a[4] + b[4]))
+    ave = words.map(lambda (k, v): (k, v[0]/v[4], v[1], v[2], v[3])).foreachRDD(sendBackKafka)
 
     # kafka producer
     kafkaProducer = KafkaProducer(

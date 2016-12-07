@@ -6,7 +6,7 @@ cassandra-driver    https://github.com/datastax/python-driver
 pykafka   https://github.com/Parsely/pykafka
 
 # 配置环境
-pip install -r requirements.txt
+pip install -r requirement.txt
 
 # 运行
 使用格式：

@@ -65,10 +65,17 @@ def grasp_stock_price(stockcode):
         
         prices = stock_info.get_historical(last_time.strftime('%Y-%m-%d'), now_time.strftime('%Y-%m-%d'))
 
+        predict_date = datetime.fromtimestamp(time.time())
+        print predict_date
         for price in prices:
+            price['predict_date'] = str(predict_date)
             tmp =[]
             tmp.append(price)
             single_price = json.dumps(tmp)
+            #sleep need be implement
+            #time.sleep(0.5)
+            #logger.warn("%s,%s", price['Date'], price['Close'])    
+            #logger.warn('%s is %s',(price['Date'],price['Close']))
             producer.send(topic=topic_name, value=single_price, timestamp_ms=time.time())
         #Sent bunch of prices for stockcode to Kafka
     except KafkaTimeoutError as timeout_error:
