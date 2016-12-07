@@ -118,5 +118,4 @@ $(function () {
     // var y11 = a * 11 + b;
     // var y12 = a * 12 + b;
 
-
 });
